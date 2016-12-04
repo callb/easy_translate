@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Easy Translate</string>
+    <string name="prompt_message">Type phrase to be translated</string>
+    <string name="translate_btn_text">Translate</string>
+    <string name="error_msg">Error getting translation</string>
+    <string name="action_settings">Language Settings</string>
+    <string name="transl_from_label">Translate From</string>
+    <string name="transl_to_label">To</string>
+</resources>
