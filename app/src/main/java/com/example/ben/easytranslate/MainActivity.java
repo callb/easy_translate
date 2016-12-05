@@ -1,6 +1,7 @@
 package com.example.ben.easytranslate;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,7 +36,6 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
 
     EditText phraseEditText;
-    TextView resultText;
     Button translateBtn;
     Spinner fromLangDropdown;
     Spinner toLangDropdown;
@@ -69,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
         setupDropdown(fromLangDropdown);
         setupDropdown(toLangDropdown);
-
-        resultText = (TextView) findViewById(R.id.result_text);
         translateBtn = (Button) findViewById(R.id.translate_btn);
         translateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                         new AvailableLangsTask().execute(new URL(urlStr));
                         break;
                     case "translate":
-                        new TranslationTask().execute(new URL(urlStr));
+                        new TranslationTask().execute(new URL(urlStr)).get();
                         break;
                     default:
                         throw new MalformedURLException(matcher.group(1));
@@ -186,7 +184,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             if(result != null) {
-                resultText.setText(result);
+                Intent translateIntent = new Intent(MainActivity.this, TranslationResult.class);
+                translateIntent.putExtra(Intent.EXTRA_TEXT, result);
+                startActivity(translateIntent);
             }
         }
     }
@@ -250,10 +250,11 @@ public class MainActivity extends AppCompatActivity {
     private void showException(Exception e) {
         Context context = getApplicationContext();
         String text = getString(R.string.error_msg);
-        int duration = Toast.LENGTH_SHORT;
+        int duration = Toast.LENGTH_LONG;
         Toast.makeText(context, text, duration).show();
-        resultText.setText(e.toString());
-        resultText.setTextColor(getResources().getColor(R.color.colorAccent));
+        Log.e("Exception", e.toString());
+        //resultText.setText(e.toString());
+        //resultText.setTextColor(getResources().getColor(R.color.colorAccent));
     }
 
     //TODO: Settings for detection, current location, etc.
