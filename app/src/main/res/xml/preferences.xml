@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:title="Language Input Method"
+        android:key="@string/lang_input_key"
+        android:defaultValue="manual"
+        android:entryValues="@array/lang_input_values"
+        android:entries="@array/lang_input_labels">
+
+    </ListPreference>
+
+</PreferenceScreen>

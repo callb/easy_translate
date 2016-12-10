@@ -9,4 +9,12 @@
     <string name="result_heading">Your translation results:</string>
     <string name="result_original_text_label">Original Text</string>
     <string name="result_translated_text_label">Translated Text</string>
+    <string name="lang_input_title">Language Input Method</string>
+    <string name="lang_input_key">lang_input_method</string>
+    <string name="manual_input_label">Manual</string>
+    <string name="auto_input_label">Automatic Detection</string>
+    <string name="use_location_input_label">Current Location</string>
+    <string name="manual_input_key">manual</string>
+    <string name="auto_input_key">auto</string>
+    <string name="use_location_input_key">location</string>
 </resources>

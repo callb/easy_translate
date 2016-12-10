@@ -2,18 +2,20 @@ package com.example.ben.easytranslate;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -33,7 +35,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     EditText phraseEditText;
     Button translateBtn;
@@ -44,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
     String translatedLangStr;
 
     private final String API_KEY =
-            "<ENTER_YOUR_API_KEY_HERE>";
+            "";
 
     @Override
     protected void onStart() {
         super.onStart();
         final String getAvailableLangsUrlString = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key="
                 + API_KEY;
+        //TODO: Move to onCreate and use AsyncLoaders
         makeHttpRequestFromString(getAvailableLangsUrlString);
     }
 
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 R.layout.dropdown_item,
                 R.id.dropdown_item_text);
 
-        setupDropdown(fromLangDropdown);
+        setupSharedPreferences();
         setupDropdown(toLangDropdown);
         translateBtn = (Button) findViewById(R.id.translate_btn);
         translateBtn.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +85,48 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).
+                unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.lang_input_key))) {
+            setupInputLangPref(sharedPreferences.getString(key,
+                    getString(R.string.manual_input_key)));
+        }
+    }
+
+    private void setupSharedPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String initialInputLangPref = sharedPreferences.getString(getString(R.string.lang_input_key),
+                getString(R.string.manual_input_key));
+        setupInputLangPref(initialInputLangPref);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+
+    }
+
+    private void setupInputLangPref(String key) {
+        switch (key) {
+            case "manual":
+                setupDropdown(fromLangDropdown);
+                break;
+            case "auto":
+                break;
+            case "location":
+                break;
+        }
+    }
 
     private void setupDropdown(final Spinner dropdown) {
         dropdown.setAdapter(langsAdapter);
@@ -257,10 +302,19 @@ public class MainActivity extends AppCompatActivity {
         //resultText.setTextColor(getResources().getColor(R.color.colorAccent));
     }
 
-    //TODO: Settings for detection, current location, etc.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int optionSelected = item.getItemId();
+        if (optionSelected == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="lang_input_labels">
+        <item>Manual</item>
+        <item>Automatic Detection</item>
+        <item>Current Location</item>
+    </string-array>
+    <string-array name="lang_input_values">
+        <item>manual</item>
+        <item>auto</item>
+        <item>location</item>
+    </string-array>
+</resources>
