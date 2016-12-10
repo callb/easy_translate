@@ -48,19 +48,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private final String API_KEY =
             "";
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        final String getAvailableLangsUrlString = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key="
-                + API_KEY;
-        //TODO: Move to onCreate and use AsyncLoaders
-        makeHttpRequestFromString(getAvailableLangsUrlString);
-    }
 
-    //TODO: Add new activity for translation page
+    //TODO: Add additional info on translation page
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final String getAvailableLangsUrlString = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key="
+                + API_KEY;
+        makeHttpRequestFromString(getAvailableLangsUrlString);
         setContentView(R.layout.activity_main);
 
         phraseEditText = (EditText) findViewById(R.id.phrase_edit_text);
@@ -77,10 +72,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             @Override
             public void onClick(View view) {
                 String phrase = phraseEditText.getText().toString();
-                final String detectLanguageUrlString = "https://translate.yandex.net/api/v1.5/tr.json/translate?key="
-                        + API_KEY + "&text=" + phrase + "&lang=" + originalLangStr + "-" + translatedLangStr;
+                String translateUrlString = "https://translate.yandex.net/api/v1.5/tr.json/translate?key="
+                        + API_KEY + "&text=" + phrase + "&lang=" + originalLangStr + translatedLangStr;
 
-                makeHttpRequestFromString(detectLanguageUrlString);
+                makeHttpRequestFromString(translateUrlString);
             }
         });
     }
@@ -122,8 +117,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 setupDropdown(fromLangDropdown);
                 break;
             case "auto":
+                ArrayAdapter<String> autoLangAdapter =
+                        new ArrayAdapter<>(this,
+                                R.layout.dropdown_item,
+                                R.id.dropdown_item_text);
+                autoLangAdapter.add(getString(R.string.auto_input_label));
+                fromLangDropdown.setAdapter(autoLangAdapter);
+                originalLangStr = "";
+
                 break;
             case "location":
+                String lang = Locale.getDefault().getDisplayLanguage();
+                ArrayAdapter<String> locAdapter =
+                        new ArrayAdapter<>(this,
+                                R.layout.dropdown_item,
+                                R.id.dropdown_item_text);
+                locAdapter.add(lang);
+                fromLangDropdown.setAdapter(locAdapter);
+                originalLangStr = Locale.getDefault().getISO3Language() + "-";
                 break;
         }
     }
@@ -135,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String selectedLang = adapterView.getItemAtPosition(i).toString();
                 String langCode = null;
+
                 for (Locale locale : Locale.getAvailableLocales()) {
                     if (selectedLang.equals(locale.getDisplayLanguage())) {
                         langCode = locale.getISO3Language();
@@ -142,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     }
                 }
                 if (dropdown == fromLangDropdown && langCode != null) {
-                    originalLangStr = langCode;
+                    originalLangStr = langCode + "-";
                 } else if (dropdown == toLangDropdown && langCode != null) {
                     translatedLangStr = langCode;
                 }

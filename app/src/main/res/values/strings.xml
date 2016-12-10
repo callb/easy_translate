@@ -12,7 +12,7 @@
     <string name="lang_input_title">Language Input Method</string>
     <string name="lang_input_key">lang_input_method</string>
     <string name="manual_input_label">Manual</string>
-    <string name="auto_input_label">Automatic Detection</string>
+    <string name="auto_input_label">Detect Language</string>
     <string name="use_location_input_label">Current Location</string>
     <string name="manual_input_key">manual</string>
     <string name="auto_input_key">auto</string>

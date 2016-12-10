@@ -4,6 +4,7 @@
         android:title="Language Input Method"
         android:key="@string/lang_input_key"
         android:defaultValue="manual"
+        android:summary="%s"
         android:entryValues="@array/lang_input_values"
         android:entries="@array/lang_input_labels">
 
