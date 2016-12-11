@@ -5,8 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +39,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<String[]>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     EditText phraseEditText;
     Button translateBtn;
@@ -45,25 +51,41 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     String originalLangStr;
     String translatedLangStr;
 
-    private final String API_KEY =
+    private static final String API_KEY =
             "";
+
+    private static final String SAVED_LANGS_KEY = "langs";
+    private static final String GET_LANGS_BUNDLE_KEY = "langs_url";
+    private static final int GET_LANGS_LOADER = 1;
+    private static final int TRANSLATE_LOADER = 2;
 
 
     //TODO: Add additional info on translation page
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final String getAvailableLangsUrlString = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key="
-                + API_KEY;
-        makeHttpRequestFromString(getAvailableLangsUrlString);
+
+        langsAdapter = new ArrayAdapter<>(this,
+                R.layout.dropdown_item,
+                R.id.dropdown_item_text);
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SAVED_LANGS_KEY)) {
+                ArrayList<String> lifecycleCallbacks =
+                        savedInstanceState.getStringArrayList(SAVED_LANGS_KEY);
+                langsAdapter.addAll(lifecycleCallbacks);
+            }
+        } else {
+            final String getAvailableLangsUrlString = "https://translate.yandex.net/api/v1.5/tr.json/getLangs?key="
+                    + API_KEY;
+            makeHttpRequestFromString(getAvailableLangsUrlString);
+        }
+
         setContentView(R.layout.activity_main);
 
         phraseEditText = (EditText) findViewById(R.id.phrase_edit_text);
         fromLangDropdown = (Spinner) findViewById(R.id.translate_from);
         toLangDropdown = (Spinner) findViewById(R.id.translate_to);
-        langsAdapter = new ArrayAdapter<>(this,
-                R.layout.dropdown_item,
-                R.id.dropdown_item_text);
 
         setupSharedPreferences();
         setupDropdown(toLangDropdown);
@@ -78,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 makeHttpRequestFromString(translateUrlString);
             }
         });
+
     }
 
     @Override
@@ -90,6 +113,59 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        ArrayList<String> savedLangs = new ArrayList<>();
+        for (int i = 0; i < langsAdapter.getCount(); i++) {
+            savedLangs.add(langsAdapter.getItem(i));
+        }
+        outState.putStringArrayList(SAVED_LANGS_KEY, savedLangs);
+
+    }
+
+    @Override
+    public Loader<String[]> onCreateLoader(int id, final Bundle args) {
+        return new AsyncTaskLoader<String[]>(this) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if (args == null) {
+                    return;
+                }
+            }
+
+            @Override
+            public String[] loadInBackground() {
+                String getLangsUrlString = args.getString(GET_LANGS_BUNDLE_KEY);
+                Log.d("###", getLangsUrlString);
+                if (getLangsUrlString == null || TextUtils.isEmpty(getLangsUrlString)) {
+                    return null;
+                }
+                try {
+                    StringBuffer buffer = getRawJsonBuffer(new URL(getLangsUrlString));
+                    if (buffer != null) {
+                        String translationJsonString = buffer.toString();
+                        return getAvailableLangsFromJson(translationJsonString);
+                    }
+                    return null;
+
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String[]> loader, String[] data) {
+        if (data != null) {
+            if (data.length > 0) {
+                langsAdapter.clear();
+                langsAdapter.addAll(data);
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String[]> loader) {
 
     }
 
@@ -168,14 +244,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     }
 
-    private void makeHttpRequestFromString(String urlStr) {
+    private void   makeHttpRequestFromString(String urlStr) {
         Pattern apiCallPattern = Pattern.compile("tr.json/(.*)\\?key=");
         Matcher matcher = apiCallPattern.matcher(urlStr);
         try {
             if (matcher.find()) {
                 switch (matcher.group(1)) {
                     case "getLangs":
-                        new AvailableLangsTask().execute(new URL(urlStr));
+                        LoaderManager loaderManager = getSupportLoaderManager();
+                        Loader<String[]> getLangsLoader = loaderManager.getLoader(GET_LANGS_LOADER);
+
+                        Bundle queryBundle = new Bundle();
+                        queryBundle.putString(GET_LANGS_BUNDLE_KEY, urlStr);
+
+                        if (getLangsLoader == null) {
+                            loaderManager.initLoader(GET_LANGS_LOADER, queryBundle, this).forceLoad();
+                        } else {
+                            loaderManager.restartLoader(GET_LANGS_LOADER, queryBundle, this).forceLoad();
+                        }
                         break;
                     case "translate":
                         new TranslationTask().execute(new URL(urlStr)).get();
@@ -191,33 +277,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     //TODO: Move network tasks from AsyncTask
-    public class AvailableLangsTask extends AsyncTask<URL, Void, String[]> {
-
-        @Override
-        protected String[] doInBackground(URL... params) {
-            URL url = params[0];
-            try {
-                StringBuffer buffer = getRawJsonBuffer(url);
-                if (buffer != null) {
-                    String translationJsonString = buffer.toString();
-                    return getAvailableLangsFromJson(translationJsonString);
-                }
-                return null;
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            if (result.length > 0) {
-                langsAdapter.clear();
-                langsAdapter.addAll(result);
-            }
-        }
-    }
 
 
     public class TranslationTask extends AsyncTask<URL, Void, String> {
