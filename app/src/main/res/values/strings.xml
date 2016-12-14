@@ -18,6 +18,7 @@
     <string name="auto_input_key">auto</string>
     <string name="use_location_input_key">location</string>
     <string name="voice_transl_label">Voice Translation</string>
+    <string name="enter_audio">Tap the microphone to begin voice translation</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

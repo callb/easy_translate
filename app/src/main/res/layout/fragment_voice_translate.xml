@@ -1,13 +1,39 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.ben.easytranslate.VoiceTranslateFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    android:orientation="vertical" >
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/txt_output"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:textSize="26dp"
+        android:textStyle="normal" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="60dp"
+        android:gravity="center"
+        android:orientation="vertical" >
+        <ImageButton
+            android:id="@+id/btn_mic"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/microphone" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/enter_audio"
+            android:textSize="15dp"
+            android:textStyle="normal" />
+    </LinearLayout>
+</RelativeLayout>
 
-</FrameLayout>
