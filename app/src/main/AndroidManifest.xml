@@ -11,9 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:windowSoftInputMode="adjustNothing"
-            android:launchMode="singleTop">
+            android:name=".MainTextActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,13 +22,13 @@
         </activity>
         <activity
             android:name=".TranslationResult"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainTextActivity" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".MainActivity">
-
-        </activity>
+            android:parentActivityName=".MainTextActivity"></activity>
+        <activity android:name=".MainVoiceActivity"
+            android:parentActivityName=".MainTextActivity"></activity>
     </application>
 
 </manifest>

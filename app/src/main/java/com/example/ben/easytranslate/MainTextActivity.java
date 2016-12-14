@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -40,7 +39,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity implements
+public class MainTextActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String[]>,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements
             makeHttpRequestFromString(getAvailableLangsUrlString);
         }
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_text);
 
         phraseEditText = (EditText) findViewById(R.id.phrase_edit_text);
         fromLangDropdown = (Spinner) findViewById(R.id.translate_from);
@@ -301,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(String result) {
             if(result != null) {
-                Intent translateIntent = new Intent(MainActivity.this, TranslationResult.class);
+                Intent translateIntent = new Intent(MainTextActivity.this, TranslationResult.class);
                 translateIntent.putExtra(Intent.EXTRA_TEXT, result);
                 startActivity(translateIntent);
             }
@@ -386,6 +385,8 @@ public class MainActivity extends AppCompatActivity implements
         if (optionSelected == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if (optionSelected == R.id.nav_voice) {
+            startActivity(new Intent(this, MainVoiceActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
